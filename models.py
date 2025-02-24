@@ -1,10 +1,10 @@
-from flask_sqlalchemy import SQLAlchemy
+#from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask_bcrypt import Bcrypt
+#from flask_bcrypt import Bcrypt
+from extensions  import db, bcrypt
 
-
-db = SQLAlchemy()
-bcrypt = Bcrypt()
+#db = SQLAlchemy()
+#bcrypt = Bcrypt()
 
 
 
@@ -16,6 +16,10 @@ class User(db.Model):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+
+    decks = db.relationship("Deck", backref="user", lazy=True)
+    progress = db.relationship("Progress", backref="user", lazy=True)
+
 
     def set_password(self, password):
         self.password_hash = bcrypt.generate_password_hash(password).decode("utf-8")
@@ -38,6 +42,7 @@ class Deck(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     flashcards = db.relationship("Flashcard", backref="deck", lazy=True)
+    progress = db.relationship("Progress", backref="deck", lazy=True)
 
 
 class Flashcard(db.Model):
