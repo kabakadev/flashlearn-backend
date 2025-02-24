@@ -50,4 +50,15 @@ class Flashcard(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+class Progress(db.Model):
+    __tablename__ = "progress"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    deck_id = db.Column(db.Integer, db.ForeignKey("decks.id"), nullable=False)
+    flashcard_id = db.Column(db.Integer, db.ForeignKey("flashcards.id"), nullable=False)
+    study_count = db.Column(db.Integer, default=0, nullable=False)
+    last_studied_at = db.Column(db.DateTime, default=datetime.utcnow)
+    next_review_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_learned = db.Column(db.Boolean, default=False)
 
