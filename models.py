@@ -26,3 +26,13 @@ class Deck(db.Model):
     created_at = db.Column(db.DateTime, default=datetime)
     updated_at = db.Column(db.DateTime, default=datetime, onupdate=datetime)
 
+class Flashcard(db.Model):
+    __tablename__ = "flashcards"
+
+    id = db.Column(db.Integer, primary_key=True)
+    deck_id = db.Column(db.Integer, db.ForeignKey("decks.id"), nullable=False)
+    front_text = db.Column(db.Text, nullable=False)
+    back_text = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime)
+    updated_at = db.Column(db.DateTime, default=datetime, onupdate=datetime)
+
