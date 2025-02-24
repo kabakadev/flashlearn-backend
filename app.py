@@ -10,7 +10,7 @@ app.config.from_object(Config)
 
 
 db = SQLAlchemy()
-db.init_app(app)
+#db.init_app(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 CORS(app)
@@ -26,4 +26,5 @@ def home():
 
 
 if __name__ == "__main__":
+
     app.run(debug=True)
