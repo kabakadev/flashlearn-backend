@@ -1,9 +1,6 @@
 import os
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
-
 class Config:
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'flashlearn.db')}"
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///flashlearn.db")  # Default to SQLite
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = "supersecretkey"  
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "supersecretkey")
