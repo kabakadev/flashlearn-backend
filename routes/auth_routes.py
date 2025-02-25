@@ -8,18 +8,26 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.json
+    
     user = User.query.filter((User.username == data["username"]) | (User.email == data["email"])).first()
     
     if user:
         return jsonify({"message": "User already exists"}), 400
     
     new_user = User(username=data["username"], email=data["email"])
-    new_user.set_password(data["password"])
+    new_user.set_password(data["password"])  
+    
     db.session.add(new_user)
     db.session.commit()
     
-    return jsonify({"message": "User registered"}), 201
-
+    return jsonify({
+        "message": "User registered",
+        "user": {
+            "id": new_user.id,
+            "username": new_user.username,
+            "email": new_user.email
+        }
+    }), 201
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
@@ -27,6 +35,13 @@ def login():
 
     if user and user.check_password(data["password"]):
         access_token = create_access_token(identity=user.id)
-        return jsonify({"access_token": access_token}), 200
+        return jsonify({
+            "access_token": access_token,
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email
+            }
+        }), 200
 
     return jsonify({"message": "Invalid credentials"}), 401

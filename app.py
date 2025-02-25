@@ -13,12 +13,12 @@ def create_app():
     jwt.init_app(app)
     CORS(app)
     
-    # Importing models and register blueprints
+    
     with app.app_context():
-        # Importing models after db is defined 
+        # Importing models 
         from models import User, Deck, Flashcard, Progress
         
-        # to create tables if they don't exist
+        
         db.create_all()
         
         
@@ -31,7 +31,7 @@ def create_app():
     
     return app
 
-# to  create the app instance if this file is run directly
+
 if __name__ == "__main__":
     app = create_app()
     app.run(debug=True)
