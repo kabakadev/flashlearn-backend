@@ -45,3 +45,21 @@ def get_decks():
         for deck in decks
     ]), 200
 
+# to get a Single Deck
+@deck_bp.route("/<int:deck_id>", methods=["GET"])
+@jwt_required()
+def get_deck(deck_id):
+    user_id = get_jwt_identity()
+    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+
+    if not deck:
+        return jsonify({"error": "Deck not found"}), 404
+
+    return jsonify({
+        "id": deck.id,
+        "title": deck.title,
+        "description": deck.description,
+        "subject": deck.subject,
+        "category": deck.category,
+        "difficulty": deck.difficulty
+    }), 200
