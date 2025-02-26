@@ -2,10 +2,17 @@
 from datetime import datetime
 #from flask_bcrypt import Bcrypt
 from extensions  import db, bcrypt
+from enum import Enum
+
 
 #db = SQLAlchemy()
 #bcrypt = Bcrypt()
 
+class ReviewStatus(Enum):
+    NEW = "new"
+    LEARNING = "learning"
+    REVIEWING = "reviewing"
+    MASTERED = "mastered"
 
 
 
