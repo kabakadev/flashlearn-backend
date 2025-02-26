@@ -63,3 +63,39 @@ def get_deck(deck_id):
         "category": deck.category,
         "difficulty": deck.difficulty
     }), 200
+
+# Update a Deck
+@deck_bp.route("/<int:deck_id>", methods=["PUT"])
+@jwt_required()
+def update_deck(deck_id):
+    user_id = get_jwt_identity()
+    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+
+    if not deck:
+        return jsonify({"error": "Deck not found"}), 404
+
+    data = request.json
+
+    deck.title = data.get("title", deck.title)
+    deck.description = data.get("description", deck.description)
+    deck.subject = data.get("subject", deck.subject)
+    deck.category = data.get("category", deck.category)
+    deck.difficulty = data.get("difficulty", deck.difficulty)
+
+    db.session.commit()
+    return jsonify({"message": "Deck updated successfully"}), 200
+
+
+# delete a Deck
+@deck_bp.route("/<int:deck_id>", methods=["DELETE"])
+@jwt_required()
+def delete_deck(deck_id):
+    user_id = get_jwt_identity()
+    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+
+    if not deck:
+        return jsonify({"error": "Deck not found"}), 404
+
+    db.session.delete(deck)
+    db.session.commit()
+    return jsonify({"message": "Deck deleted successfully"}), 200
