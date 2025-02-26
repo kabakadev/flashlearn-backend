@@ -27,3 +27,21 @@ def create_deck():
     db.session.commit()
     return jsonify({"message": "Deck created successfully", "deck_id": new_deck.id}), 201
 
+# to get All Decks (for logged-in user)
+@deck_bp.route("/", methods=["GET"])
+@jwt_required()
+def get_decks():
+    user_id = get_jwt_identity()
+    decks = Deck.query.filter_by(user_id=user_id).all()
+    return jsonify([
+        {
+            "id": deck.id,
+            "title": deck.title,
+            "description": deck.description,
+            "subject": deck.subject,
+            "category": deck.category,
+            "difficulty": deck.difficulty
+        }
+        for deck in decks
+    ]), 200
+
