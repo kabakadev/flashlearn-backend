@@ -28,3 +28,24 @@ def create_flashcard():
     db.session.add(flashcard)
     db.session.commit()
     return jsonify({"message": "Flashcard created", "id": flashcard.id}), 201
+
+# Update a flashcard
+@flashcard_bp.route("/update/<int:flashcard_id>", methods=["PUT"])
+@jwt_required()
+def update_flashcard(flashcard_id):
+    user_id = get_jwt_identity()
+    data = request.json
+
+    flashcard = Flashcard.query.join(Deck).filter(
+        Flashcard.id == flashcard_id,
+        Deck.user_id == user_id
+    ).first()
+
+    if not flashcard:
+        return jsonify({"error": "Flashcard not found or unauthorized"}), 403
+
+    flashcard.front_text = data.get("front_text", flashcard.front_text)
+    flashcard.back_text = data.get("back_text", flashcard.back_text)
+
+    db.session.commit()
+    return jsonify({"message": "Flashcard updated"}), 200
