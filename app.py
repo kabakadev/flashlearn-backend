@@ -23,7 +23,11 @@ def create_app():
         
         
         from routes.auth_routes import auth_bp
+        from routes.deck_routes import deck_bp
+
         app.register_blueprint(auth_bp, url_prefix="/auth")
+        app.register_blueprint(deck_bp, url_prefix="/decks")
+
     
     @app.route("/")
     def home():
