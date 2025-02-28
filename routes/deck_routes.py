@@ -41,6 +41,7 @@ def get_decks():
             "subject": deck.subject,
             "category": deck.category,
             "difficulty": deck.difficulty
+            
         }
         for deck in decks
     ]), 200
