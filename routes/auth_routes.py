@@ -5,7 +5,7 @@ from flask_restful import Resource
 from flask_jwt_extended import create_access_token
 from sqlalchemy.exc import IntegrityError
 import re
-from config import db
+from config import db, api
 from models import User
 
 def is_valid_email(email):
@@ -33,35 +33,17 @@ class Signup(Resource):
             return {"error": "Username or email already exists"}, 409
 
 
-@auth_bp.route("/login", methods=["POST"])
-def login():
-    data = request.json
-    user = User.query.filter_by(email=data["email"]).first()
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+        email, password = data.get("email"), data.get("password")
 
-    if user and user.check_password(data["password"]):
-        access_token = create_access_token(identity=user.id)
-        return jsonify({
-            "access_token": access_token,
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email
-            }
-        }), 200
+        user = User.query.filter_by(email=email).first()
+        if user and user.check_password(password):
+            token = create_access_token(identity={"id": user.id, "username": user.username})
+            return {"message": "Login successful", "token": token}, 200
 
-    return jsonify({"message": "Invalid credentials"}), 401
+        return {"error": "Invalid email or password"}, 401
 
-@auth_bp.route("/user", methods=["GET"])
-@jwt_required()  # Requires valid token
-def get_user():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-
-    if not user:
-        return jsonify({"message": "User not found"}), 404
-
-    return jsonify({
-        "id": user.id,
-        "username": user.username,
-        "email": user.email
-    }), 200
+api.add_resource(Signup, "/signup")
+api.add_resource(Login, "/login")
