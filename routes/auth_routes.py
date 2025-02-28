@@ -1,33 +1,38 @@
-from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from models import db, User
-
-auth_bp = Blueprint("auth", __name__)
 
 
-@auth_bp.route("/register", methods=["POST"])
-def register():
-    data = request.json
-    
-    user = User.query.filter((User.username == data["username"]) | (User.email == data["email"])).first()
-    
-    if user:
-        return jsonify({"message": "User already exists"}), 400
-    
-    new_user = User(username=data["username"], email=data["email"])
-    new_user.set_password(data["password"])  
-    
-    db.session.add(new_user)
-    db.session.commit()
-    
-    return jsonify({
-        "message": "User registered",
-        "user": {
-            "id": new_user.id,
-            "username": new_user.username,
-            "email": new_user.email
-        }
-    }), 201
+from flask import request, jsonify
+from flask_restful import Resource
+from flask_jwt_extended import create_access_token
+from sqlalchemy.exc import IntegrityError
+import re
+from config import db
+from models import User
+
+def is_valid_email(email):
+    return re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email)
+
+class Signup(Resource):
+    def post(self):
+        data = request.get_json()
+        username, email, password = data.get("username"), data.get("email"), data.get("password")
+
+        if not username or not email or not password:
+            return {"error": "Missing required fields"}, 400
+
+        if not is_valid_email(email):
+            return {"error": "Invalid email format"}, 400
+
+        try:
+            user = User(username=username, email=email)
+            user.set_password(password)
+            db.session.add(user)
+            db.session.commit()
+            return {"message": "User registered successfully"}, 201
+        except IntegrityError:
+            db.session.rollback()
+            return {"error": "Username or email already exists"}, 409
+
+
 @auth_bp.route("/login", methods=["POST"])
 def login():
     data = request.json
