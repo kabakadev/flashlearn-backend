@@ -91,3 +91,43 @@ class DeckResource(Resource):
             "created_at": deck.created_at.isoformat(),
             "updated_at": deck.updated_at.isoformat()
         }, 200
+    
+@jwt_required()
+def put(self, deck_id):
+        """Update an existing deck."""
+        user_id = get_jwt_identity().get("id")
+        data = request.get_json()
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found"}, 404
+
+        for field in ["title", "description", "subject", "category", "difficulty"]:
+            if field in data:
+                setattr(deck, field, data[field])
+
+        db.session.commit()
+
+        return {
+            "id": deck.id,
+            "title": deck.title,
+            "description": deck.description,
+            "subject": deck.subject,
+            "category": deck.category,
+            "difficulty": deck.difficulty,
+            "updated_at": deck.updated_at.isoformat()
+        }, 200
+
+@jwt_required()
+def delete(self, deck_id):
+        """Delete an existing deck."""
+        user_id = get_jwt_identity().get("id")
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found"}, 404
+
+        db.session.delete(deck)
+        db.session.commit()
+
+        return {"message": "Deck deleted successfully"}, 200    
