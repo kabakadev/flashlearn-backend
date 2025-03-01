@@ -73,3 +73,27 @@ def post(self, deck_id):
             db.session.rollback()
             return {"error": "Flashcard creation failed due to a database error"}, 500
 
+class FlashcardResource(Resource):
+    @jwt_required()
+    def get(self, deck_id, card_id):
+        """Retrieve a single flashcard by ID (only if the user owns the deck)."""
+        user_id = get_jwt_identity().get("id")
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found or unauthorized"}, 404
+
+        card = Flashcard.query.filter_by(id=card_id, deck_id=deck_id).first()
+        if not card:
+            return {"error": "Flashcard not found"}, 404
+
+        return {
+            "id": card.id,
+            "question": card.question,
+            "answer": card.answer,
+            "hint": card.hint,
+            "difficulty": card.difficulty,
+            "deck_id": card.deck_id,
+            "created_at": card.created_at.isoformat(),
+            "updated_at": card.updated_at.isoformat(),
+        }, 200
