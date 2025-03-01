@@ -11,7 +11,7 @@ class FlashcardListResource(Resource):
         """Retrieve all flashcards for a specific deck (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
 
-        # Verify deck belongs to user
+        
         deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
         if not deck:
             return {"error": "Deck not found or unauthorized"}, 404
@@ -32,42 +32,44 @@ class FlashcardListResource(Resource):
             for card in flashcards
         ], 200
 
-
-# Update a flashcard
-@flashcard_bp.route("/update/<int:flashcard_id>", methods=["PUT"])
 @jwt_required()
-def update_flashcard(flashcard_id):
-    user_id = get_jwt_identity()
-    data = request.json
+def post(self, deck_id):
+        """Create a new flashcard in a specific deck (only if the user owns the deck)."""
+        user_id = get_jwt_identity().get("id")
+        data = request.get_json()
 
-    flashcard = Flashcard.query.join(Deck).filter(
-        Flashcard.id == flashcard_id,
-        Deck.user_id == user_id
-    ).first()
+        
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found or unauthorized"}, 404
 
-    if not flashcard:
-        return jsonify({"error": "Flashcard not found or unauthorized"}), 403
+        required_fields = ["question", "answer", "difficulty"]
+        if not all(field in data and data[field] for field in required_fields):
+            return {"error": "Question, answer, and difficulty are required"}, 400
 
-    flashcard.front_text = data.get("front_text", flashcard.front_text)
-    flashcard.back_text = data.get("back_text", flashcard.back_text)
+        try:
+            new_card = Flashcard(
+                question=data["question"],
+                answer=data["answer"],
+                hint=data.get("hint", ""),  # Optional
+                difficulty=data["difficulty"],
+                deck_id=deck_id
+            )
+            db.session.add(new_card)
+            db.session.commit()
 
-    db.session.commit()
-    return jsonify({"message": "Flashcard updated"}), 200
+            return {
+                "id": new_card.id,
+                "question": new_card.question,
+                "answer": new_card.answer,
+                "hint": new_card.hint,
+                "difficulty": new_card.difficulty,
+                "deck_id": new_card.deck_id,
+                "created_at": new_card.created_at.isoformat(),
+                "updated_at": new_card.updated_at.isoformat(),
+            }, 201
 
-# Delete a flashcard
-@flashcard_bp.route("/delete/<int:flashcard_id>", methods=["DELETE"])
-@jwt_required()
-def delete_flashcard(flashcard_id):
-    user_id = get_jwt_identity()
+        except IntegrityError:
+            db.session.rollback()
+            return {"error": "Flashcard creation failed due to a database error"}, 500
 
-    flashcard = Flashcard.query.join(Deck).filter(
-        Flashcard.id == flashcard_id,
-        Deck.user_id == user_id
-    ).first()
-
-    if not flashcard:
-        return jsonify({"error": "Flashcard not found or unauthorized"}), 403
-
-    db.session.delete(flashcard)
-    db.session.commit()
-    return jsonify({"message": "Flashcard deleted"}), 200
