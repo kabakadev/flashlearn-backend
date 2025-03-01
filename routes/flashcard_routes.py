@@ -1,50 +1,36 @@
-from flask import Blueprint, request, jsonify
+from flask import request
+from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Flashcard, Deck
+from sqlalchemy.exc import IntegrityError
+from models import db, Flashcard, Deck, User
 
 
-flashcard_bp = Blueprint("flashcards", __name__)
+class FlashcardListResource(Resource):
+    @jwt_required()
+    def get(self, deck_id):
+        """Retrieve all flashcards for a specific deck (only if the user owns the deck)."""
+        user_id = get_jwt_identity().get("id")
 
-# to create a flashcard
-@flashcard_bp.route("/create", methods=["POST"])
-@jwt_required()
-def create_flashcard():
-    user_id = get_jwt_identity()
-    data = request.json
+        # Verify deck belongs to user
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found or unauthorized"}, 404
 
-    # Validating input
-    if not data.get("deck_id") or not data.get("front_text") or not data.get("back_text"):
-        return jsonify({"error": "All fields are required"}), 400
+        flashcards = Flashcard.query.filter_by(deck_id=deck_id).all()
 
-    deck = Deck.query.filter_by(id=data["deck_id"], user_id=user_id).first()
-    if not deck:
-        return jsonify({"error": "Deck not found or unauthorized"}), 403
-
-    flashcard = Flashcard(
-        deck_id=data["deck_id"],
-        front_text=data["front_text"],
-        back_text=data["back_text"]
-    )
-    db.session.add(flashcard)
-    db.session.commit()
-    return jsonify({"message": "Flashcard created", "id": flashcard.id}), 201
-
-# Retrieve all flashcards in a deck
-@flashcard_bp.route("/deck/<int:deck_id>", methods=["GET"])
-@jwt_required()
-def get_flashcards(deck_id):
-    user_id = get_jwt_identity()
-    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
-    
-    if not deck:
-        return jsonify({"error": "Deck not found or unauthorized"}), 403
-
-    flashcards = Flashcard.query.filter_by(deck_id=deck_id).all()
-    return jsonify([{
-        "id": fc.id,
-        "front_text": fc.front_text,
-        "back_text": fc.back_text
-    } for fc in flashcards]), 200
+        return [
+            {
+                "id": card.id,
+                "question": card.question,
+                "answer": card.answer,
+                "hint": card.hint,
+                "difficulty": card.difficulty,
+                "deck_id": card.deck_id,
+                "created_at": card.created_at.isoformat(),
+                "updated_at": card.updated_at.isoformat(),
+            }
+            for card in flashcards
+        ], 200
 
 
 # Update a flashcard
