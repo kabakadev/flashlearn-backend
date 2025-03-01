@@ -31,7 +31,7 @@ class DeckListResource(Resource):
 
 
 @jwt_required()
-    def post(self):
+def post(self):
         """Create a new deck for the authenticated user."""
         data = request.get_json()
         user_id = get_jwt_identity().get("id")
@@ -71,3 +71,23 @@ class DeckListResource(Resource):
             db.session.rollback()
             return {"error": "Deck creation failed due to a database error"}, 500
 
+class DeckResource(Resource):
+    @jwt_required()
+    def get(self, deck_id):
+        """Retrieve a single deck by ID for the authenticated user."""
+        user_id = get_jwt_identity().get("id")
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found"}, 404
+
+        return {
+            "id": deck.id,
+            "title": deck.title,
+            "description": deck.description,
+            "subject": deck.subject,
+            "category": deck.category,
+            "difficulty": deck.difficulty,
+            "created_at": deck.created_at.isoformat(),
+            "updated_at": deck.updated_at.isoformat()
+        }, 200
