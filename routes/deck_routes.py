@@ -1,102 +1,133 @@
-from flask import Blueprint, request, jsonify
+from flask import request
+from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from models import db, Deck
+from sqlalchemy.exc import IntegrityError
+from models import db, Deck, User
 
-deck_bp = Blueprint("decks", __name__)
 
-# Create a Deck
-@deck_bp.route("/", methods=["POST"])
+class DeckListResource(Resource):
+    @jwt_required()
+    def get(self):
+        """Retrieve all decks for the authenticated user."""
+        user_id = get_jwt_identity().get("id")
+        decks = Deck.query.filter_by(user_id=user_id).all()
+
+        if not decks:
+            return {"message": "You have no decks yet."}, 200
+
+        return [
+            {
+                "id": deck.id,
+                "title": deck.title,
+                "description": deck.description,
+                "subject": deck.subject,
+                "category": deck.category,
+                "difficulty": deck.difficulty,
+                "created_at": deck.created_at.isoformat(),
+                "updated_at": deck.updated_at.isoformat(),
+            }
+            for deck in decks
+        ], 200
+
+
 @jwt_required()
-def create_deck():
-    user_id = get_jwt_identity()  # to get logged-in user ID
-    data = request.json
-    
-    if not data.get("title"):
-        return jsonify({"error": "Title is required"}), 400
+def post(self):
+        """Create a new deck for the authenticated user."""
+        data = request.get_json()
+        user_id = get_jwt_identity().get("id")
 
-    new_deck = Deck(
-        user_id=user_id,
-        title=data["title"],
-        description=data.get("description"),
-        subject=data.get("subject"),
-        category=data.get("category"),
-        difficulty=data.get("difficulty")
-    )
+        required_fields = ["title", "description", "subject", "category", "difficulty"]
+        if not all(field in data and data[field] for field in required_fields):
+            return {"error": "All fields are required"}, 400
 
-    db.session.add(new_deck)
-    db.session.commit()
-    return jsonify({"message": "Deck created successfully", "deck_id": new_deck.id}), 201
+        user = User.query.get(user_id)
+        if not user:
+            return {"error": "User not found"}, 404
 
-# to get All Decks (for logged-in user)
-@deck_bp.route("/", methods=["GET"])
-@jwt_required()
-def get_decks():
-    user_id = get_jwt_identity()
-    decks = Deck.query.filter_by(user_id=user_id).all()
-    return jsonify([
-        {
+        try:
+            new_deck = Deck(
+                title=data["title"],
+                description=data["description"],
+                subject=data["subject"],
+                category=data["category"],
+                difficulty=data["difficulty"],
+                user_id=user_id
+            )
+            db.session.add(new_deck)
+            db.session.commit()
+
+            return {
+                "id": new_deck.id,
+                "title": new_deck.title,
+                "description": new_deck.description,
+                "subject": new_deck.subject,
+                "category": new_deck.category,
+                "difficulty": new_deck.difficulty,
+                "created_at": new_deck.created_at.isoformat(),
+                "updated_at": new_deck.updated_at.isoformat(),
+            }, 201
+
+        except IntegrityError:
+            db.session.rollback()
+            return {"error": "Deck creation failed due to a database error"}, 500
+
+class DeckResource(Resource):
+    @jwt_required()
+    def get(self, deck_id):
+        """Retrieve a single deck by ID for the authenticated user."""
+        user_id = get_jwt_identity().get("id")
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found"}, 404
+
+        return {
             "id": deck.id,
             "title": deck.title,
             "description": deck.description,
             "subject": deck.subject,
             "category": deck.category,
-            "difficulty": deck.difficulty
-            
-        }
-        for deck in decks
-    ]), 200
-
-# to get a Single Deck
-@deck_bp.route("/<int:deck_id>", methods=["GET"])
+            "difficulty": deck.difficulty,
+            "created_at": deck.created_at.isoformat(),
+            "updated_at": deck.updated_at.isoformat()
+        }, 200
+    
 @jwt_required()
-def get_deck(deck_id):
-    user_id = get_jwt_identity()
-    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+def put(self, deck_id):
+        """Update an existing deck."""
+        user_id = get_jwt_identity().get("id")
+        data = request.get_json()
 
-    if not deck:
-        return jsonify({"error": "Deck not found"}), 404
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found"}, 404
 
-    return jsonify({
-        "id": deck.id,
-        "title": deck.title,
-        "description": deck.description,
-        "subject": deck.subject,
-        "category": deck.category,
-        "difficulty": deck.difficulty
-    }), 200
+        for field in ["title", "description", "subject", "category", "difficulty"]:
+            if field in data:
+                setattr(deck, field, data[field])
 
-# Update a Deck
-@deck_bp.route("/<int:deck_id>", methods=["PUT"])
+        db.session.commit()
+
+        return {
+            "id": deck.id,
+            "title": deck.title,
+            "description": deck.description,
+            "subject": deck.subject,
+            "category": deck.category,
+            "difficulty": deck.difficulty,
+            "updated_at": deck.updated_at.isoformat()
+        }, 200
+
 @jwt_required()
-def update_deck(deck_id):
-    user_id = get_jwt_identity()
-    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+def delete(self, deck_id):
+        """Delete an existing deck."""
+        user_id = get_jwt_identity().get("id")
 
-    if not deck:
-        return jsonify({"error": "Deck not found"}), 404
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found"}, 404
 
-    data = request.json
+        db.session.delete(deck)
+        db.session.commit()
 
-    deck.title = data.get("title", deck.title)
-    deck.description = data.get("description", deck.description)
-    deck.subject = data.get("subject", deck.subject)
-    deck.category = data.get("category", deck.category)
-    deck.difficulty = data.get("difficulty", deck.difficulty)
-
-    db.session.commit()
-    return jsonify({"message": "Deck updated successfully"}), 200
-
-
-# delete a Deck
-@deck_bp.route("/<int:deck_id>", methods=["DELETE"])
-@jwt_required()
-def delete_deck(deck_id):
-    user_id = get_jwt_identity()
-    deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
-
-    if not deck:
-        return jsonify({"error": "Deck not found"}), 404
-
-    db.session.delete(deck)
-    db.session.commit()
-    return jsonify({"message": "Deck deleted successfully"}), 200
+        return {"message": "Deck deleted successfully"}, 200    
