@@ -2,8 +2,7 @@ from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
-from models import db, Flashcard, Deck, User
-
+from models import db, Flashcard, Deck
 
 class FlashcardListResource(Resource):
     @jwt_required()
@@ -11,7 +10,6 @@ class FlashcardListResource(Resource):
         """Retrieve all flashcards for a specific deck (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
 
-        
         deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
         if not deck:
             return {"error": "Deck not found or unauthorized"}, 404
@@ -32,13 +30,12 @@ class FlashcardListResource(Resource):
             for card in flashcards
         ], 200
 
-@jwt_required()
-def post(self, deck_id):
+    @jwt_required()
+    def post(self, deck_id):
         """Create a new flashcard in a specific deck (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
         data = request.get_json()
 
-        
         deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
         if not deck:
             return {"error": "Deck not found or unauthorized"}, 404
@@ -73,6 +70,7 @@ def post(self, deck_id):
             db.session.rollback()
             return {"error": "Flashcard creation failed due to a database error"}, 500
 
+
 class FlashcardResource(Resource):
     @jwt_required()
     def get(self, deck_id, card_id):
@@ -97,3 +95,50 @@ class FlashcardResource(Resource):
             "created_at": card.created_at.isoformat(),
             "updated_at": card.updated_at.isoformat(),
         }, 200
+
+    @jwt_required()
+    def put(self, deck_id, card_id):
+        """Update an existing flashcard (only if the user owns the deck)."""
+        user_id = get_jwt_identity().get("id")
+        data = request.get_json()
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found or unauthorized"}, 404
+
+        card = Flashcard.query.filter_by(id=card_id, deck_id=deck_id).first()
+        if not card:
+            return {"error": "Flashcard not found"}, 404
+
+        for field in ["question", "answer", "hint", "difficulty"]:
+            if field in data:
+                setattr(card, field, data[field])
+
+        db.session.commit()
+
+        return {
+            "id": card.id,
+            "question": card.question,
+            "answer": card.answer,
+            "hint": card.hint,
+            "difficulty": card.difficulty,
+            "updated_at": card.updated_at.isoformat(),
+        }, 200
+
+    @jwt_required()
+    def delete(self, deck_id, card_id):
+        """Delete an existing flashcard (only if the user owns the deck)."""
+        user_id = get_jwt_identity().get("id")
+
+        deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found or unauthorized"}, 404
+
+        card = Flashcard.query.filter_by(id=card_id, deck_id=deck_id).first()
+        if not card:
+            return {"error": "Flashcard not found"}, 404
+
+        db.session.delete(card)
+        db.session.commit()
+
+        return {"message": "Flashcard deleted successfully"}, 200

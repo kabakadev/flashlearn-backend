@@ -4,7 +4,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from models import db, Deck, User
 
-
 class DeckListResource(Resource):
     @jwt_required()
     def get(self):
@@ -29,9 +28,8 @@ class DeckListResource(Resource):
             for deck in decks
         ], 200
 
-
-@jwt_required()
-def post(self):
+    @jwt_required()
+    def post(self):
         """Create a new deck for the authenticated user."""
         data = request.get_json()
         user_id = get_jwt_identity().get("id")
@@ -71,6 +69,7 @@ def post(self):
             db.session.rollback()
             return {"error": "Deck creation failed due to a database error"}, 500
 
+
 class DeckResource(Resource):
     @jwt_required()
     def get(self, deck_id):
@@ -91,9 +90,9 @@ class DeckResource(Resource):
             "created_at": deck.created_at.isoformat(),
             "updated_at": deck.updated_at.isoformat()
         }, 200
-    
-@jwt_required()
-def put(self, deck_id):
+
+    @jwt_required()
+    def put(self, deck_id):
         """Update an existing deck."""
         user_id = get_jwt_identity().get("id")
         data = request.get_json()
@@ -118,8 +117,8 @@ def put(self, deck_id):
             "updated_at": deck.updated_at.isoformat()
         }, 200
 
-@jwt_required()
-def delete(self, deck_id):
+    @jwt_required()
+    def delete(self, deck_id):
         """Delete an existing deck."""
         user_id = get_jwt_identity().get("id")
 
@@ -130,4 +129,4 @@ def delete(self, deck_id):
         db.session.delete(deck)
         db.session.commit()
 
-        return {"message": "Deck deleted successfully"}, 200    
+        return {"message": "Deck deleted successfully"}, 200
