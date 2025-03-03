@@ -33,6 +33,9 @@ api.add_resource(DeckResource, "/decks/<int:deck_id>")
 api.add_resource(FlashcardListResource, "/decks/<int:deck_id>/flashcards")
 api.add_resource(FlashcardResource, "/decks/<int:deck_id>/flashcards/<int:card_id>")
 
+@app.route("/")
+def home():
+    return "Welcome to FlashLearn API!"
 
 
 if __name__ == "__main__":
