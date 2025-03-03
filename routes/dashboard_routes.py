@@ -42,5 +42,40 @@ class Dashboard(Resource):
                 "deck_title": deck.title,
                 "flashcards_studied": deck_study_count
             })
+
+        # Fetch user stats
+        stats = UserStats.query.filter_by(user_id=user_id).first()
+        if not stats:
+            stats = UserStats(user_id=user_id)
+            db.session.add(stats)
+            db.session.commit()
+        
+        # Compute mastery level (accuracy %)
+        total_correct = db.session.query(db.func.sum(Progress.correct_attempts)).filter_by(user_id=user_id).scalar() or 0
+        total_attempts = db.session.query(db.func.sum(Progress.study_count)).filter_by(user_id=user_id).scalar() or 1
+        mastery_level = (total_correct / total_attempts) * 100 if total_attempts > 0 else 0
+
+        # Compute retention rate
+        retention_rate = mastery_level  # Retention rate is the same as mastery level in this case
+
+        # Compute focus score
+        total_study_time = db.session.query(db.func.sum(Progress.total_study_time)).filter_by(user_id=user_id).scalar() or 0
+        target_time_per_flashcard = 1  # Target time in minutes per flashcard
+        focus_score = 0
+
+        if total_flashcards_studied > 0:
+            average_time_per_flashcard = total_study_time / total_flashcards_studied
+            focus_score = (average_time_per_flashcard / target_time_per_flashcard) * 100
+
+        # Update user stats with calculated metrics
+        stats.mastery_level = mastery_level
+        stats.retention_rate = retention_rate
+        stats.focus_score = focus_score
+        db.session.commit()
+
+        response_data = {
+            "username": user.username,
+            "total_flashcards_studied": total_flashcards_studied,
+            "most    
         
         
