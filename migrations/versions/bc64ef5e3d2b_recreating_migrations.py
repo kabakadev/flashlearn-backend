@@ -1,8 +1,8 @@
-"""Initial models
+"""Recreating migrations
 
-Revision ID: 6ffbf24f40aa
+Revision ID: bc64ef5e3d2b
 Revises: 
-Create Date: 2025-03-01 22:57:37.406306
+Create Date: 2025-03-03 13:00:57.039215
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '6ffbf24f40aa'
+revision = 'bc64ef5e3d2b'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,7 +46,7 @@ def upgrade():
     sa.Column('question', sa.Text(), nullable=False),
     sa.Column('answer', sa.Text(), nullable=False),
     sa.Column('deck_id', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['deck_id'], ['decks.id'], ),
+    sa.ForeignKeyConstraint(['deck_id'], ['decks.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('user_progress',
@@ -55,8 +55,8 @@ def upgrade():
     sa.Column('flashcard_id', sa.Integer(), nullable=False),
     sa.Column('is_correct', sa.Boolean(), nullable=False),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['flashcard_id'], ['flashcards.id'], ),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.ForeignKeyConstraint(['flashcard_id'], ['flashcards.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###

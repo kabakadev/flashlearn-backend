@@ -1,6 +1,6 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import db  
+from config import db
 
 
 class User(db.Model):
@@ -10,8 +10,10 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=False)
+
+    # Relationships
     decks = db.relationship('Deck', back_populates='user', cascade='all, delete-orphan')
-    progress = db.relationship('UserProgress', back_populates='user', cascade='all, delete-orphan')
+    user_progress = db.relationship('UserProgress', back_populates='user', cascade='all, delete-orphan')
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -21,6 +23,7 @@ class User(db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
 
 class Deck(db.Model):
     __tablename__ = 'decks'
@@ -35,13 +38,15 @@ class Deck(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    # Relationships
     user = db.relationship("User", back_populates="decks")
     flashcards = db.relationship("Flashcard", back_populates="deck", cascade="all, delete-orphan")
 
     __table_args__ = (db.UniqueConstraint("user_id", "title", name="uq_user_deck_title"),)
 
     def __repr__(self):
-        return f'<Deck {self.name}>'
+        return f'<Deck {self.title}>'
+
 
 class Flashcard(db.Model):
     __tablename__ = 'flashcards'
@@ -49,22 +54,27 @@ class Flashcard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
-    deck_id = db.Column(db.Integer, db.ForeignKey('decks.id'), nullable=False)
+    deck_id = db.Column(db.Integer, db.ForeignKey('decks.id', ondelete="CASCADE"), nullable=False)
+
+    # Relationships
     deck = db.relationship('Deck', back_populates='flashcards')
     progress = db.relationship('UserProgress', back_populates='flashcard', cascade='all, delete-orphan')
 
     def __repr__(self):
         return f'<Flashcard {self.question[:50]}>'
 
-class Progress(db.Model):
+
+class UserProgress(db.Model):  # Renamed from 'Progress' to 'UserProgress'
     __tablename__ = 'user_progress'
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    flashcard_id = db.Column(db.Integer, db.ForeignKey('flashcards.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete="CASCADE"), nullable=False)
+    flashcard_id = db.Column(db.Integer, db.ForeignKey('flashcards.id', ondelete="CASCADE"), nullable=False)
     is_correct = db.Column(db.Boolean, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    user = db.relationship('User', back_populates='progress')
+
+    # Relationships
+    user = db.relationship('User', back_populates='user_progress')
     flashcard = db.relationship('Flashcard', back_populates='progress')
 
     def __repr__(self):
