@@ -40,3 +40,85 @@ class ProgressResource(Resource):
             }
             for p in progress_entries
         ], 200
+    
+    @jwt_required()
+    def post(self):
+        """
+        Track user progress for a flashcard.
+        """
+        user_id = get_jwt_identity().get("id")
+        data = request.get_json()
+
+        # Fetch or create progress entry
+        progress = Progress.query.filter_by(
+            user_id=user_id,
+            flashcard_id=data["flashcard_id"],
+        ).first()
+
+        if not progress:
+            progress = Progress(
+                user_id=user_id,
+                flashcard_id=data["flashcard_id"],
+                deck_id=data["deck_id"],
+                study_count=0,
+                total_study_time=0,
+                correct_attempts=0,
+                incorrect_attempts=0,
+                review_status='new',
+                is_learned=False
+            )
+            db.session.add(progress)
+
+        # Update progress data
+        progress.study_count += 1
+        progress.total_study_time += data.get("time_spent", 0)
+        if data.get("was_correct"):
+            progress.correct_attempts += 1
+        else:
+            progress.incorrect_attempts += 1
+
+        # Update review status and mastery
+        if progress.correct_attempts >= 3:  # Example: 3 correct attempts to master
+            progress.review_status = "mastered"
+            progress.is_learned = True
+
+        db.session.commit()
+
+        # Update user stats
+        stats = UserStats.query.filter_by(user_id=user_id).first()
+        if not stats:
+            stats = UserStats(user_id=user_id)
+            db.session.add(stats)
+
+        # Recalculate metrics
+        total_correct = db.session.query(db.func.sum(Progress.correct_attempts)).filter_by(user_id=user_id).scalar() or 0
+        total_attempts = db.session.query(db.func.sum(Progress.study_count)).filter_by(user_id=user_id).scalar() or 1
+        stats.mastery_level = round((total_correct / total_attempts) * 100, 2)  # Round to 2 decimal places
+
+        # Update cards_mastered
+        stats.cards_mastered = Progress.query.filter_by(user_id=user_id, review_status="mastered").count()
+
+        # Update retention_rate (same as mastery_level in this case)
+        stats.retention_rate = stats.mastery_level
+
+        # Update focus_score (example calculation)
+        total_study_time = db.session.query(db.func.sum(Progress.total_study_time)).filter_by(user_id=user_id).scalar() or 0
+        target_time_per_flashcard = 1  # Target time in minutes per flashcard
+        if total_attempts > 0:
+            average_time_per_flashcard = total_study_time / total_attempts
+            stats.focus_score = round((average_time_per_flashcard / target_time_per_flashcard) * 100, 2)
+
+        db.session.commit()
+
+        return {
+            "id": progress.id,
+            "user_id": progress.user_id,
+            "flashcard_id": progress.flashcard_id,
+            "deck_id": progress.deck_id,
+            "study_count": progress.study_count,
+            "correct_attempts": progress.correct_attempts,
+            "incorrect_attempts": progress.incorrect_attempts,
+            "total_study_time": progress.total_study_time,
+            "review_status": progress.review_status,
+            "is_learned": progress.is_learned,
+        }, 200
