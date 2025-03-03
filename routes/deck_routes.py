@@ -22,6 +22,7 @@ class DeckListResource(Resource):
                 "subject": deck.subject,
                 "category": deck.category,
                 "difficulty": deck.difficulty,
+                "is_default": deck.is_default,
                 "created_at": deck.created_at.isoformat(),
                 "updated_at": deck.updated_at.isoformat(),
             }
@@ -50,6 +51,7 @@ class DeckListResource(Resource):
                 category=data["category"],
                 difficulty=data["difficulty"],
                 user_id=user_id
+                is_default=data.get("is_default", False)
             )
             db.session.add(new_deck)
             db.session.commit()
@@ -61,6 +63,8 @@ class DeckListResource(Resource):
                 "subject": new_deck.subject,
                 "category": new_deck.category,
                 "difficulty": new_deck.difficulty,
+                "is_default": new_deck.is_default,  # Include is_default in the response
+                "user_id": new_deck.user_id,
                 "created_at": new_deck.created_at.isoformat(),
                 "updated_at": new_deck.updated_at.isoformat(),
             }, 201
@@ -87,6 +91,7 @@ class DeckResource(Resource):
             "subject": deck.subject,
             "category": deck.category,
             "difficulty": deck.difficulty,
+            "is_default": deck.is_default,
             "created_at": deck.created_at.isoformat(),
             "updated_at": deck.updated_at.isoformat()
         }, 200
@@ -114,6 +119,7 @@ class DeckResource(Resource):
             "subject": deck.subject,
             "category": deck.category,
             "difficulty": deck.difficulty,
+            "is_default": deck.is_default,
             "updated_at": deck.updated_at.isoformat()
         }, 200
 
