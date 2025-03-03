@@ -12,6 +12,12 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
     
     # Relationships
     decks = db.relationship('Deck', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -23,7 +29,7 @@ class User(db.Model):
         raise AttributeError('password is not a readable attribute')
         
     @password.setter
-    def password_hash(self, password):
+    def password(self, password):
         self.password_hash = generate_password_hash(password)
         
     def check_password(self, password):
