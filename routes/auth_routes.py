@@ -2,7 +2,7 @@
 
 from flask import request,Flask, jsonify
 from flask_restful import Api, Resource
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 import re
 
@@ -12,6 +12,9 @@ app = Flask(__name__)
 api = Api(app)
 def is_valid_email(email):
     return re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email)
+
+def is_valid_username(username):
+    return 3 <= len(username) <= 50
 
 class Signup(Resource):
     def post(self):
@@ -47,3 +50,8 @@ class Login(Resource):
 
         return {"error": "Invalid email or password"}, 401
 
+class ProtectedUser(Resource):
+    @jwt_required()
+    def get(self):
+        current_user = get_jwt_identity()
+        return jsonify(current_user)

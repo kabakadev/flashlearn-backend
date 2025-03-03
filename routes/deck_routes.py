@@ -50,7 +50,7 @@ class DeckListResource(Resource):
                 subject=data["subject"],
                 category=data["category"],
                 difficulty=data["difficulty"],
-                user_id=user_id
+                user_id=user_id,
                 is_default=data.get("is_default", False)
             )
             db.session.add(new_deck)
