@@ -1,7 +1,6 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from config import db  # ✅ Use the initialized db instance
-
+from config import db  
 
 
 class User(db.Model):
@@ -27,13 +26,19 @@ class Deck(db.Model):
     __tablename__ = 'decks'
 
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(255), nullable=False)
-    name = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.Text)
+    subject = db.Column(db.String(50))
+    category = db.Column(db.String(50))
+    difficulty = db.Column(db.Integer)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    user = db.relationship('User', back_populates='decks')
-    flashcards = db.relationship('Flashcard', back_populates='deck', cascade='all, delete-orphan')
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship("User", back_populates="decks")
+    flashcards = db.relationship("Flashcard", back_populates="deck", cascade="all, delete-orphan")
+
+    __table_args__ = (db.UniqueConstraint("user_id", "title", name="uq_user_deck_title"),)
 
     def __repr__(self):
         return f'<Deck {self.name}>'
