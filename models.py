@@ -54,6 +54,10 @@ class Flashcard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.Text, nullable=False)
     answer = db.Column(db.Text, nullable=False)
+    hint = db.Column(db.String, nullable=True)
+    difficulty = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     deck_id = db.Column(db.Integer, db.ForeignKey('decks.id', ondelete="CASCADE"), nullable=False)
 
     # Relationships
