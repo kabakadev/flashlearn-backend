@@ -12,9 +12,9 @@ from flask_cors import CORS
 
 # Initialize Flask App
 app = Flask(__name__)
-CORS(app)
-app.config.from_object(Config)
 
+app.config.from_object(Config)
+CORS(app, supports_credentials=True)
 
 
 # Initialize Extensions

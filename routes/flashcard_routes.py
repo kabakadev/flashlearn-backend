@@ -1,10 +1,16 @@
-from flask import request
+from flask import request, Flask
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from models import db, Flashcard, Deck
+from flask_cors import  CORS
+
+app = Flask(__name__)
+
+CORS(app)
 
 class FlashcardListResource(Resource):
+    #@cross_origin()
     @jwt_required()
     def get(self, deck_id):
         """Retrieve all flashcards for a specific deck (only if the user owns the deck)."""
