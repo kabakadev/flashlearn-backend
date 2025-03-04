@@ -3,8 +3,11 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from config import db
 from models import UserStats
+from flask_cors import cross_origin
+
 
 class UserStatsResource(Resource):
+    @cross_origin()
     @jwt_required()
     def put(self):
         """Update user stats, such as weekly goal."""
