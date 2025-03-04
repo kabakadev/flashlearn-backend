@@ -28,7 +28,7 @@ instance/
 *.db
 *.sqlite
 *.sqlite3
-*.flashlearn.db
+
 # Environment variables
 .env
 .env.local
