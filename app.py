@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from config import db, jwt, Config
 from routes.auth_routes import Signup, Login, UserResource
 from routes.deck_routes import DeckListResource, DeckResource
-from routes.flashcard_routes import FlashcardListResource, FlashcardResource
+from routes.flashcard_routes import FlashcardResource, FlashcardDetailResource
 from routes.progress_routes import ProgressResource
 from routes.stats_routes import UserStatsResource
 from routes.dashboard_routes import Dashboard
@@ -15,7 +15,7 @@ app = Flask(__name__)
 
 app.config.from_object(Config)
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True, allow_headers=["Content-Type", "Authorization"])
 
 # Initialize Extensions
 db.init_app(app)
@@ -32,8 +32,8 @@ api.add_resource(Login, "/login")
 api.add_resource(UserResource, "/user")
 api.add_resource(DeckListResource, "/decks")
 api.add_resource(DeckResource, "/decks/<int:deck_id>")
-api.add_resource(FlashcardListResource, "/decks/<int:deck_id>/flashcards")
-api.add_resource(FlashcardResource, "/decks/<int:deck_id>/flashcards/<int:card_id>")
+api.add_resource(FlashcardResource, "/flashcards")
+api.add_resource(FlashcardDetailResource, "/flashcards/<int:id>")
 api.add_resource(ProgressResource, "/progress")
 api.add_resource(UserStatsResource, "/stats")
 api.add_resource(Dashboard, "/dashboard")

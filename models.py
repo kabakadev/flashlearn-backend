@@ -13,17 +13,11 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-    
     # Relationships
     decks = db.relationship('Deck', backref='user', lazy=True, cascade='all, delete-orphan')
     progress = db.relationship('Progress', backref='user', lazy=True, cascade='all, delete-orphan')
     stats = db.relationship('UserStats', backref='user', lazy=True, uselist=False, cascade='all, delete-orphan')
-    
+
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -31,7 +25,7 @@ class User(db.Model):
     @password.setter
     def password(self, password):
         self.password_hash = generate_password_hash(password)
-        
+
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
@@ -57,12 +51,12 @@ class Flashcard(db.Model):
     __tablename__ = 'flashcards'
     
     id = db.Column(db.Integer, primary_key=True)
-    deck_id = db.Column(db.Integer, db.ForeignKey('decks.id'), nullable=False)
+    default_deck_id = db.Column(db.Integer, db.ForeignKey('decks.id'), nullable=False)  # FIXED
     front_text = db.Column(db.Text, nullable=False)
     back_text = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
+    updated_at = db.Column(db.DateTime, server_default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+
     # Relationships
     progress = db.relationship('Progress', backref='flashcard', lazy=True, cascade='all, delete-orphan')
 

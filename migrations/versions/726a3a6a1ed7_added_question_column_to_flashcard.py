@@ -1,8 +1,8 @@
-"""Add UserStats model
+"""Added question column to Flashcard
 
-Revision ID: 61187c9ac716
+Revision ID: 726a3a6a1ed7
 Revises: 
-Create Date: 2025-03-03 16:42:16.439692
+Create Date: 2025-03-05 15:22:00.269546
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '61187c9ac716'
+revision = '726a3a6a1ed7'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,6 +22,7 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
+    sa.Column('password_hash', sa.String(length=255), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id'),
@@ -61,12 +62,12 @@ def upgrade():
     )
     op.create_table('flashcards',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('deck_id', sa.Integer(), nullable=False),
+    sa.Column('default_deck_id', sa.Integer(), nullable=False),
     sa.Column('front_text', sa.Text(), nullable=False),
     sa.Column('back_text', sa.Text(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['deck_id'], ['decks.id'], ),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.ForeignKeyConstraint(['default_deck_id'], ['decks.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('progress',
