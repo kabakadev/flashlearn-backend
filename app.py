@@ -24,7 +24,7 @@ api.add_resource(FlashcardDetailResource, "/flashcards/<int:id>")
 api.add_resource(ProgressResource, "/progress")
 api.add_resource(UserStatsResource, "/stats")
 api.add_resource(Dashboard, "/dashboard")
-api.add_resource(UserStatsResource, "/user/stats")
+
 
 @app.route("/")
 def home():
