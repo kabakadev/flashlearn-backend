@@ -14,8 +14,8 @@ from flask_cors import CORS
 app = Flask(__name__)
 
 app.config.from_object(Config)
-CORS(app, supports_credentials=True)
 
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 # Initialize Extensions
 db.init_app(app)

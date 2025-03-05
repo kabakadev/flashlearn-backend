@@ -3,26 +3,23 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from models import db, Deck, User
-from flask_cors import  CORS
+from flask_cors import CORS
+
 app = Flask(__name__)
 CORS(app)
 
 
 class DeckListResource(Resource):
     @jwt_required()
-    def get(self, deck_id):
-        """Retrieve a single deck by ID for the authenticated user."""
-        try:
-           user_id = get_jwt_identity().get("id")
-           print("User ID:", user_id)  # Debugging
+    def get(self):
+        """Retrieve all decks for the authenticated user."""
+        user_id = get_jwt_identity().get("id")
 
-           deck = Deck.query.filter_by(id=deck_id, user_id=user_id).first()
-           print("Deck Found:", deck)  # Debugging
+        decks = Deck.query.filter_by(user_id=user_id).all()
+        if not decks:
+            return {"error": "No decks found"}, 404
 
-           if not deck:
-            return {"error": "Deck not found"}, 404
-
-           return {
+        return [{
             "id": deck.id,
             "title": deck.title,
             "description": deck.description,
@@ -31,11 +28,8 @@ class DeckListResource(Resource):
             "difficulty": deck.difficulty,
             "is_default": deck.is_default,
             "created_at": deck.created_at.isoformat(),
-            "updated_at": deck.updated_at.isoformat(),
-           }, 200
-        except Exception as e:
-         print("Error fetching deck:", str(e))  # Log error
-         return {"error": "Something went wrong while fetching the deck"}, 500
+            "updated_at": deck.updated_at.isoformat()
+        } for deck in decks], 200
 
     @jwt_required()
     def post(self):
@@ -71,7 +65,7 @@ class DeckListResource(Resource):
                 "subject": new_deck.subject,
                 "category": new_deck.category,
                 "difficulty": new_deck.difficulty,
-                "is_default": new_deck.is_default,  # Include is_default in the response
+                "is_default": new_deck.is_default,
                 "user_id": new_deck.user_id,
                 "created_at": new_deck.created_at.isoformat(),
                 "updated_at": new_deck.updated_at.isoformat(),
