@@ -23,8 +23,6 @@ jwt.init_app(app)
 migrate = Migrate(app, db)
 api = Api(app)
 
-# Import models AFTER initializing db to avoid circular import issues
-from models import User, Deck, Flashcard
 
 # Register API Endpoints
 api.add_resource(Signup, "/signup")
@@ -34,8 +32,8 @@ api.add_resource(DeckListResource, "/decks")
 api.add_resource(DeckResource, "/decks/<int:deck_id>")
 api.add_resource(FlashcardListResource, "/flashcards")
 api.add_resource(FlashcardResource, "/flashcards/<int:id>")
-api.add_resource(ProgressResource, "/progress")
-api.add_resource(UserStatsResource, "/stats")
+api.add_resource(ProgressResource, "/progress", "/progress/<int:progress_id>", "/progress/deck/<int:deck_id>", "/progress/flashcard/<int:flashcard_id>")
+api.add_resource(UserStatsResource, "/user/stats")
 api.add_resource(Dashboard, "/dashboard")
 
 @app.route("/")
