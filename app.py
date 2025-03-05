@@ -29,7 +29,7 @@ from models import User, Deck, Flashcard
 # Register API Endpoints
 api.add_resource(Signup, "/signup")
 api.add_resource(Login, "/login")
-api.add_resource(property, "/user")
+api.add_resource(ProtectedUser, "/user")
 api.add_resource(DeckListResource, "/decks")
 api.add_resource(DeckResource, "/decks/<int:deck_id>")
 api.add_resource(FlashcardListResource, "/flashcards")

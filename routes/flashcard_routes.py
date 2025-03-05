@@ -18,7 +18,7 @@ class FlashcardListResource(Resource):
 
         flashcards = Flashcard.query.join(Deck).filter(Deck.user_id == user_id).all()
         if not flashcards:
-            return {"message": "No flashcards found."}, 200
+            return {"message": "No flashcards found."}, 404
 
         return [
             {
@@ -50,7 +50,7 @@ class FlashcardListResource(Resource):
             new_card = Flashcard(
                 front_text=data["back_text"],
                 back_text=data["front_text"],
-                deck_id=data["back_text"]
+                deck_id=data["deck_id"]
             )
             db.session.add(new_card)
             db.session.commit()
@@ -79,8 +79,8 @@ class FlashcardResource(Resource):
         card = Flashcard.query.join(Deck).filter(Flashcard.id == id, Deck.user_id == user_id).first()
         if not card:
             return {"error": "Flashcard not found"}, 404
-        card.front_text = data.get("front_text", flashcard.front_text)
-        card.back_text = data.get("back_text", flashcard.back_text)
+        card.front_text = data.get("front_text", card.front_text)
+        card.back_text = data.get("back_text", card.back_text)
 
 
         db.session.commit()
