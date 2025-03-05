@@ -3,6 +3,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 
@@ -16,8 +17,9 @@ class Config:
 
 
 db = SQLAlchemy()
-api = Api()
+api = Api(app)
 jwt = JWTManager()
 bcrypt = Bcrypt(app)
+migrate = Migrate(app, db)
 
 CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
