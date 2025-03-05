@@ -2,7 +2,7 @@ from flask import Flask
 from flask_restful import Api
 from flask_migrate import Migrate
 from config import db, jwt, Config
-from routes.auth_routes import Signup, Login, UserResource
+from routes.auth_routes import Signup, Login, ProtectedUser
 from routes.deck_routes import DeckListResource, DeckResource
 from routes.flashcard_routes import FlashcardListResource, FlashcardResource
 from routes.progress_routes import ProgressResource
@@ -29,11 +29,11 @@ from models import User, Deck, Flashcard
 # Register API Endpoints
 api.add_resource(Signup, "/signup")
 api.add_resource(Login, "/login")
-api.add_resource(UserResource, "/user")
+api.add_resource(property, "/user")
 api.add_resource(DeckListResource, "/decks")
 api.add_resource(DeckResource, "/decks/<int:deck_id>")
-api.add_resource(FlashcardListResource, "/decks/<int:deck_id>/flashcards")
-api.add_resource(FlashcardResource, "/decks/<int:deck_id>/flashcards/<int:card_id>")
+api.add_resource(FlashcardListResource, "/flashcards")
+api.add_resource(FlashcardResource, "/flashcards/<int:card_id>")
 api.add_resource(ProgressResource, "/progress")
 api.add_resource(UserStatsResource, "/stats")
 api.add_resource(Dashboard, "/dashboard")

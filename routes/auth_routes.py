@@ -63,22 +63,6 @@ class Login(Resource):
         return {"error": "Invalid email or password"}, 401
     
     # Fetching user. 
-class UserResource(Resource):
-    @jwt_required()
-    def get(self):
-        user_data = get_jwt_identity()  
-        user_id = user_data["id"]  
-
-        user = User.query.get(user_id)
-        if not user:
-            return {"error": "User not found"}, 404
-
-        return {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email
-        }, 200
-
 class ProtectedUser(Resource):
     @jwt_required()
     def get(self):
