@@ -7,10 +7,10 @@ from routes.dashboard_routes import Dashboard
 from routes.progress_routes import ProgressResource
 from routes.stats_routes import UserStatsResource
 
-# Register all routes
+# Registering all routes
 api.add_resource(Signup, "/signup")
 api.add_resource(Login, "/login")
-api.add_resource(ProtectedUser, "/user")  # Add this line
+api.add_resource(ProtectedUser, "/user")  
 api.add_resource(DecksResource, "/decks")
 api.add_resource(DeckResource, "/decks/<int:deck_id>")
 api.add_resource(FlashcardResource, "/flashcards")
@@ -18,6 +18,11 @@ api.add_resource(FlashcardDetailResource, "/flashcards/<int:id>")
 api.add_resource(Dashboard, "/dashboard")
 api.add_resource(ProgressResource, "/progress", "/progress/<int:progress_id>", "/progress/deck/<int:deck_id>", "/progress/flashcard/<int:flashcard_id>")
 api.add_resource(UserStatsResource, "/user/stats")
+
+@app.route("/")
+def home():
+    return "Welcome to FlashLearn API!"
+
 
 if __name__ == "__main__":
     app.run(debug=True)

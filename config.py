@@ -10,7 +10,7 @@ import os
 app = Flask(__name__)
 from datetime import timedelta
 
-app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)  # Extend to 8 hours
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=10)  
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flashlearn.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
