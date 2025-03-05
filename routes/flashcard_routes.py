@@ -71,7 +71,7 @@ class FlashcardListResource(Resource):
 
 class FlashcardResource(Resource):
     @jwt_required()
-    def put(self, deck_id, card_id):
+    def put(self, id):
         """Update an existing flashcard (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
         data = request.get_json()
@@ -94,7 +94,7 @@ class FlashcardResource(Resource):
         }, 200
 
     @jwt_required()
-    def delete(self, deck_id, card_id):
+    def delete(self,id):
         """Delete an existing flashcard (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
         card = Flashcard.query.join(Deck).filter(Flashcard.id == id, Deck.user_id == user_id).first()
