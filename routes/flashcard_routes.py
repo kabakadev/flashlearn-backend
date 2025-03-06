@@ -7,89 +7,96 @@ from models import Flashcard, Deck
 class FlashcardResource(Resource):
     @jwt_required()
     def get(self):
-        """Retrieve all flashcards for the authenticated user."""
+        """Retrieve all flashcards for a specific deck (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
-        flashcards = Flashcard.query.join(Deck).filter(Deck.user_id == user_id).all()
 
+        flashcards = Flashcard.query.join(Deck).filter(Deck.user_id == user_id).all()
         if not flashcards:
             return {"message": "No flashcards found."}, 200
 
         return [
             {
-                "id": flashcard.id,
-                "deck_id": flashcard.deck_id,
-                "front_text": flashcard.front_text,
-                "back_text": flashcard.back_text,
-                "created_at": flashcard.created_at.isoformat(),
-                "updated_at": flashcard.updated_at.isoformat()
+               "id": card.id,
+                "deck_id": card.deck_id,
+                "front_text": card.front_text,
+                "back_text": card.back_text,
+                "created_at": card.created_at.isoformat(),
+                "updated_at": card.updated_at.isoformat()
             }
             for flashcard in flashcards
         ], 200
 
     @jwt_required()
     def post(self):
-        """Create a new flashcard for the authenticated user."""
+        """Create a new flashcard in a specific deck (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
         data = request.get_json()
+
+        deck = Deck.query.filter_by(id=data["deck_id"], user_id=user_id).first()
+        if not deck:
+            return {"error": "Deck not found or unauthorized"}, 404
 
         required_fields = ["deck_id", "front_text", "back_text"]
         if not all(field in data and data[field] for field in required_fields):
             return {"error": "All fields are required"}, 400
 
-        deck = Deck.query.filter_by(id=data["deck_id"], user_id=user_id).first()
-        if not deck:
-            return {"error": "Deck not found or does not belong to the user"}, 404
+        try:
+            new_card = Flashcard(
+                front_text=data["back_text"],
+                back_text=data["front_text"],
+                deck_id=data["deck_id"]
+            )
+            db.session.add(new_card)
+            db.session.commit()
 
-        new_flashcard = Flashcard(
-            deck_id=data["deck_id"],
-            front_text=data["front_text"],
-            back_text=data["back_text"]
-        )
+            return {
+                "id": new_card.id,
+                "front_text": new_card.front_text,
+                "back_text": new_card.back_text,
+                "deck_id": new_card.deck_id,
+                "created_at": new_card.created_at.isoformat(),
+                "updated_at": new_card.updated_at.isoformat(),
+            }, 201
 
-        db.session.add(new_flashcard)
-        db.session.commit()
+        except IntegrityError:
+            db.session.rollback()
+            return {"error": "Flashcard creation failed due to a database error"}, 500
 
-        return {
-            "id": new_flashcard.id,
-            "deck_id": new_flashcard.deck_id,
-            "front_text": new_flashcard.front_text,
-            "back_text": new_flashcard.back_text,
-            "created_at": new_flashcard.created_at.isoformat(),
-            "updated_at": new_flashcard.updated_at.isoformat()
-        }, 201
 
-class FlashcardDetailResource(Resource):
+class FlashcardResource(Resource):
     @jwt_required()
     def put(self, id):
-        """Update a flashcard by ID."""
+        """Update an existing flashcard (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
         data = request.get_json()
 
-        flashcard = Flashcard.query.join(Deck).filter(Flashcard.id == id, Deck.user_id == user_id).first()
-        if not flashcard:
+        card = Flashcard.query.join(Deck).filter(Flashcard.id == id, Deck.user_id == user_id).first()
+        if not card:
             return {"error": "Flashcard not found"}, 404
+        card.front_text = data.get("front_text", card.front_text)
+        card.back_text = data.get("back_text", card.back_text)
 
-        flashcard.front_text = data.get("front_text", flashcard.front_text)
-        flashcard.back_text = data.get("back_text", flashcard.back_text)
 
         db.session.commit()
 
         return {
-            "id": flashcard.id,
-            "deck_id": flashcard.deck_id,
-            "front_text": flashcard.front_text,
-            "back_text": flashcard.back_text,
-            "updated_at": flashcard.updated_at.isoformat()
+            "id": card.id,
+            "deck_id": card.deck_id,
+            "front_text": card.front_text,
+            "back_text": card.back_text,
+            "updated_at": card.updated_at.isoformat()
         }, 200
 
     @jwt_required()
-    def delete(self, id):
-        """Delete a flashcard by ID."""
+    def delete(self,id):
+        """Delete an existing flashcard (only if the user owns the deck)."""
         user_id = get_jwt_identity().get("id")
-        flashcard = Flashcard.query.join(Deck).filter(Flashcard.id == id, Deck.user_id == user_id).first()
+        card = Flashcard.query.join(Deck).filter(Flashcard.id == id, Deck.user_id == user_id).first()
 
-        if not flashcard:
-            return {"error": "Flashcard not found"}, 404
+
+        if not card:
+            return {"error": "card not found"}, 404
+
 
         db.session.delete(flashcard)
         db.session.commit()

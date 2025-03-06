@@ -50,6 +50,11 @@ class Login(Resource):
             return {"message": "Login successful", "token": token}, 200
 
         return {"error": "Invalid email or password"}, 401
+<<<<<<< HEAD
+=======
+    
+    # Fetching user. 
+>>>>>>> experimental_changes
 class ProtectedUser(Resource):
     @jwt_required()
     def get(self):
