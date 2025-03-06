@@ -17,9 +17,6 @@ class FlashcardListResource(Resource):
         user_id = get_jwt_identity().get("id")
         flashcards = Flashcard.query.join(Deck).filter(Deck.user_id == user_id).all()
 
-        if not flashcards:
-            return {"message": "No flashcards found."}, 200
-
         return [
             {
                 "id": flashcard.id,
