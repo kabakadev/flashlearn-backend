@@ -18,7 +18,7 @@ class FlashcardListResource(Resource):
 
         flashcards = Flashcard.query.join(Deck).filter(Deck.user_id == user_id).all()
         if not flashcards:
-            return {"message": "No flashcards found."}, 404
+            return {"message": "No flashcards found."}, 200
 
         return [
             {
