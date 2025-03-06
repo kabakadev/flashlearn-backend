@@ -33,6 +33,7 @@ sqlalchemy = "==2.0.23"
 typing-extensions = "==4.12.2"
 werkzeug = "==2.3.7"
 zipp = "==3.20.2"
+sqlalchemy-serializer = "*"
 
 [dev-packages]
 
