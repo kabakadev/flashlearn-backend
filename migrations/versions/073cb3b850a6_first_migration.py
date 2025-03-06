@@ -1,8 +1,8 @@
-"""Add UserStats model
+"""first migration
 
-Revision ID: 61187c9ac716
+Revision ID: 073cb3b850a6
 Revises: 
-Create Date: 2025-03-03 16:42:16.439692
+Create Date: 2025-03-06 12:31:03.950935
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '61187c9ac716'
+revision = '073cb3b850a6'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -22,23 +22,22 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('username', sa.String(length=50), nullable=False),
     sa.Column('email', sa.String(length=100), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('password_hash', sa.String(length=255), nullable=False),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
     )
     op.create_table('decks',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('title', sa.String(length=100), nullable=False),
-    sa.Column('description', sa.Text(), nullable=False),
-    sa.Column('subject', sa.String(length=50), nullable=False),
-    sa.Column('category', sa.String(length=50), nullable=False),
-    sa.Column('difficulty', sa.String(length=20), nullable=False),
-    sa.Column('is_default', sa.Boolean(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('title', sa.String(length=100), nullable=False),
+    sa.Column('description', sa.Text(), nullable=True),
+    sa.Column('subject', sa.String(length=50), nullable=True),
+    sa.Column('category', sa.String(length=50), nullable=True),
+    sa.Column('difficulty', sa.Integer(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('is_default', sa.Boolean(), server_default='0', nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -53,8 +52,6 @@ def upgrade():
     sa.Column('cards_mastered', sa.Integer(), nullable=True),
     sa.Column('minutes_per_day', sa.Float(), nullable=True),
     sa.Column('accuracy', sa.Float(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('user_id')
@@ -64,8 +61,8 @@ def upgrade():
     sa.Column('deck_id', sa.Integer(), nullable=False),
     sa.Column('front_text', sa.Text(), nullable=False),
     sa.Column('back_text', sa.Text(), nullable=False),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('updated_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
     sa.ForeignKeyConstraint(['deck_id'], ['decks.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
@@ -74,20 +71,19 @@ def upgrade():
     sa.Column('user_id', sa.Integer(), nullable=False),
     sa.Column('deck_id', sa.Integer(), nullable=False),
     sa.Column('flashcard_id', sa.Integer(), nullable=False),
-    sa.Column('study_count', sa.Integer(), nullable=True),
-    sa.Column('correct_attempts', sa.Integer(), nullable=True),
-    sa.Column('incorrect_attempts', sa.Integer(), nullable=True),
-    sa.Column('total_study_time', sa.Float(), nullable=True),
-    sa.Column('last_studied_at', sa.DateTime(), nullable=True),
-    sa.Column('next_review_at', sa.DateTime(), nullable=True),
-    sa.Column('review_status', sa.String(length=20), nullable=True),
-    sa.Column('is_learned', sa.Boolean(), nullable=True),
-    sa.Column('created_at', sa.DateTime(), nullable=True),
-    sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('study_count', sa.Integer(), nullable=False),
+    sa.Column('correct_attempts', sa.Integer(), nullable=False),
+    sa.Column('incorrect_attempts', sa.Integer(), nullable=False),
+    sa.Column('total_study_time', sa.Float(), nullable=False),
+    sa.Column('last_studied_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('next_review_at', sa.DateTime(), server_default=sa.text('(CURRENT_TIMESTAMP)'), nullable=True),
+    sa.Column('review_status', sa.Enum('new', 'learning', 'reviewing', 'mastered', name='review_status'), nullable=False),
+    sa.Column('is_learned', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['deck_id'], ['decks.id'], ),
     sa.ForeignKeyConstraint(['flashcard_id'], ['flashcards.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id', 'flashcard_id', name='unique_user_flashcard_progress')
     )
     # ### end Alembic commands ###
 

@@ -3,7 +3,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from config import db
 from models import Deck, User
-
+from datetime import datetime
 
 class DecksResource(Resource):
     @jwt_required()
@@ -13,8 +13,7 @@ class DecksResource(Resource):
         user_id = user_data.get("id")
         decks = Deck.query.filter_by(user_id=user_id).all()
 
-        if not decks:
-            return {"message": "You have no decks yet."}, 200
+
 
         return [
             {

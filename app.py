@@ -10,7 +10,7 @@ from routes.stats_routes import UserStatsResource
 # Register all routes
 api.add_resource(Signup, "/signup")
 api.add_resource(Login, "/login")
-api.add_resource(ProtectedUser, "/user")  # Add this line
+api.add_resource(ProtectedUser, "/user") 
 api.add_resource(DecksResource, "/decks")
 api.add_resource(DeckResource, "/decks/<int:deck_id>")
 api.add_resource(FlashcardResource, "/flashcards")
