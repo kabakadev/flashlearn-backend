@@ -20,7 +20,6 @@ class DeckListResource(Resource):
         if not decks:
             return {"message": "You have no decks yet."}, 200
 
-
         return [
             {
                 "id": deck.id,

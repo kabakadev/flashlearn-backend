@@ -7,25 +7,19 @@ from flask_cors import cross_origin
 
 
 class UserStatsResource(Resource):
-    @cross_origin()
     @jwt_required()
     def put(self):
         """Update user stats, such as weekly goal."""
         user_id = get_jwt_identity().get("id")
         data = request.get_json()
 
-        # Fetch or create user stats
         stats = UserStats.query.filter_by(user_id=user_id).first()
         if not stats:
             stats = UserStats(user_id=user_id)
             db.session.add(stats)
-        
 
-        # Update weekly goal if provided
         if "weekly_goal" in data:
             stats.weekly_goal = data["weekly_goal"]
-
-        # Update other stats if needed
         if "mastery_level" in data:
             stats.mastery_level = data["mastery_level"]
         if "study_streak" in data:
