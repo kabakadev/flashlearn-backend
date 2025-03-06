@@ -46,6 +46,7 @@ class Login(Resource):
 
         user = User.query.filter_by(email=email.lower()).first()
         if user and user.check_password(password):
+            print(f"User ID during login: {user.id}")  # Debugging line
             token = create_access_token(identity={"id": user.id, "username": user.username})
             return {"message": "Login successful", "token": token}, 200
 

@@ -8,6 +8,7 @@ class Dashboard(Resource):
     def get(self):
         """Fetch the logged-in user's dashboard data."""
         user_data = get_jwt_identity()
+        print("JWT Identity:", user_data)  # Debugging line
         user_id = user_data.get("id")
         
         user = User.query.filter_by(id=user_id).first()
