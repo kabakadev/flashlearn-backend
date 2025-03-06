@@ -4,7 +4,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from config import db
 from models import UserStats
 
-
 class UserStatsResource(Resource):
     @jwt_required()
     def put(self):

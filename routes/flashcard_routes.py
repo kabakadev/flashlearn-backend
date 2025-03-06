@@ -1,11 +1,12 @@
-from flask import request, Flask
+from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.exc import IntegrityError
-from models import db, Flashcard, Deck
+from config import db
+from models import Flashcard, Deck
 
 
-class FlashcardListResource(Resource):
+
+class FlashcardResource(Resource):
     #@cross_origin()
     @jwt_required()
     def get(self):
@@ -57,7 +58,7 @@ class FlashcardListResource(Resource):
             "updated_at": new_flashcard.updated_at.isoformat()
         }, 201
 
-class FlashcardResource(Resource):
+class  FlashcardDetailResource(Resource):
     @jwt_required()
     def put(self, id):
         """Update a flashcard by ID."""

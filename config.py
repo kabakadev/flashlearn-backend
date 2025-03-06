@@ -1,28 +1,27 @@
-import os
-from datetime import timedelta
-
-class Config:
-    """Base configuration class."""
-    SQLALCHEMY_DATABASE_URI = "sqlite:///flashlearn.db"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "your_secret_key")
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=8)  # Token expires in 8 hours
-    CORS_RESOURCES = {r"/*": {"origins": "*"}}  # Allow all origins
-
-
-# Flask Extensions (initialized without app to enable factory pattern)
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask
+from flask_bcrypt import Bcrypt
+from flask_migrate import Migrate
 from flask_restful import Api
+from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+import os
 
-db = SQLAlchemy()
-api = Api()
-jwt = JWTManager()
+app = Flask(__name__)
+from datetime import timedelta
 
-def init_extensions(app):
-    """Initialize extensions with the Flask app."""
-    db.init_app(app)
-    api.init_app(app)
-    jwt.init_app(app)
-    CORS(app, supports_credentials=True, resources=Config.CORS_RESOURCES)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)  # Extend to 8 hours
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///flashlearn.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY', 'supersecretkey') 
+
+jwt = JWTManager(app)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+bcrypt = Bcrypt(app)
+api = Api(app)
+
+
+CORS(app, supports_credentials=True, resources={r"/*": {"origins": "*"}})
+

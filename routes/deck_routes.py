@@ -1,12 +1,11 @@
-from flask import request, Flask
+from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from sqlalchemy.exc import IntegrityError
-from models import db, Deck, User
+from config import db
+from models import Deck, User
 
 
-
-class DeckListResource(Resource):
+class DecksResource(Resource):
     @jwt_required()
     def get(self):
         """Get all decks for the authenticated user."""

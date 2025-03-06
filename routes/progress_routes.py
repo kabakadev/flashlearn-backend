@@ -1,12 +1,10 @@
-from flask import request, Flask
+from flask import request
 from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from config import db
 from models import Progress, UserStats
 
-
 class ProgressResource(Resource):
-    
     @jwt_required()
     def get(self, deck_id=None, flashcard_id=None):
         """Retrieve progress for a specific deck or flashcard."""
