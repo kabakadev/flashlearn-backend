@@ -5,10 +5,7 @@ from config import db, api
 from models import User
 from sqlalchemy.exc import IntegrityError
 import re
-from flask_cors import CORS
 
-app = Flask(__name__)
-CORS(app)
 # Email validation
 def is_valid_email(email):
     email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'

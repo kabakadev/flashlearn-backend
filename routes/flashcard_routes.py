@@ -3,11 +3,7 @@ from flask_restful import Resource
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import IntegrityError
 from models import db, Flashcard, Deck
-from flask_cors import  CORS
 
-app = Flask(__name__)
-
-CORS(app)
 
 class FlashcardListResource(Resource):
     #@cross_origin()
