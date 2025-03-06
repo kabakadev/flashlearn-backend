@@ -2,8 +2,8 @@
 
 ## Authors
 
-- Brian Kabaka
-- John Gathio
+- Ian Kabaka
+- John Gaitho
 - Stephanie Njonjo
 
 ## Description
