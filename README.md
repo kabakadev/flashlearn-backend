@@ -1,4 +1,4 @@
-# FlashLearn Backend API
+# FlashLearn Backend API Documentation
 
 ## Authors
 
@@ -8,67 +8,60 @@
 
 ## Description
 
-FlashLearn Backend API is a RESTful API built using Flask for managing decks, flashcards, user authentication, and user progress & statistics. It utilizes JWT authentication to secure protected resources and ensure user data integrity.
+FlashLearn is a RESTful API built using Flask for managing decks, flashcards, user authentication, and user progress and statistics. It uses JWT authentication to secure resources.
 
 ## Features
 
-- **User Authentication** (Signup, Login, JWT authentication)
-- **Deck Management** (Create, View, Edit, Delete decks)
-- **Flashcard Management** (Create, View, Edit, Delete flashcards)
-- **Password Hashing** using Flask-Bcrypt
-- **JWT-Protected Resources**
+- User authentication (Signup, Login, JWT authentication)
+- Create, view, edit, and delete decks
+- Create, view, edit, and delete flashcards
+- Flask Bcrypt for password hashing
+- JWT authentication for protected resources
 
 ## Prerequisites
 
-Before setting up the project, ensure you have the following installed:
-
-- Python 3.8+
+- Familiarity with Python
+- Python 3.8 and above installed
 - SQLite database
-- Familiarity with Python and Flask
 
 ## Installation
 
-Follow these steps to set up and run the backend API:
-
-```bash
+```sh
 # Clone the repository
 git clone https://github.com/kabakadev/flashlearn-backend.git
 
-# Navigate into the project directory
+# Navigate into the repository
 cd flashlearn-backend
 
-# Install dependencies using pipenv
+# Install dependencies
 pipenv install
 
-# Activate the virtual environment
+# Activate virtual environment
 pipenv shell
 
 # Apply database migrations
 flask db upgrade
 
-# Start the Flask development server
+# Start the server
 flask run
 ```
 
-## Deployment
+## Deployed Backend URL
 
-The backend API is deployed at:
-
-- [FlashLearn Backend API](https://flashlearn-backend-2.onrender.com)
+[FlashLearn Backend](https://flashlearn-backend-2.onrender.com)
 
 ## Related Repositories
 
-- **Frontend Repository:** [FlashLearn Frontend](https://github.com/kabakadev/flashlearn-frontend.git)
-- **Deployed Frontend URL:** [FlashLearn Frontend](https://flashlearn254.netlify.app/)
+- [Frontend Repository](https://github.com/kabakadev/flashlearn-frontend.git)
+- [Deployed Frontend](https://flashlearn254.netlify.app/)
 
 ## API Endpoints
 
-### User Authentication
+### Auth Routes
 
 #### Register a new user
 
 **POST** `/signup`
-
 **Request Body:**
 
 ```json
@@ -90,7 +83,6 @@ The backend API is deployed at:
 #### Log in an existing user
 
 **POST** `/login`
-
 **Request Body:**
 
 ```json
@@ -105,14 +97,13 @@ The backend API is deployed at:
 ```json
 {
   "message": "Login successful",
-  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTc0MTI4ODI4MSwianRpIjoiNDA1YTliMDQtYWVhZi00Mzg0LWE5MDYtNmZjMjM3M2RkYjMzIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6eyJpZCI6MSwidXNlcm5hbWUiOiJpYW4ifSwibmJmIjoxNzQxMjg4MjgxLCJleHAiOjE3NDEzMTcwODF9.j1A9JH53aaVUmrx82wymZJy5Mi0NesZ86AXR0HTj_VM"
+  "token": "<JWT_TOKEN>"
 }
 ```
 
-### Fetch Authenticated User Data
+#### Fetch authenticated user data
 
 **GET** `/user`
-
 **Response:**
 
 ```json
@@ -122,10 +113,11 @@ The backend API is deployed at:
 }
 ```
 
-### Fetch Logged-in User's Dashboard Data
+### Dashboard Routes
+
+#### Fetch logged-in user's dashboard data
 
 **GET** `/dashboard`
-
 **Response:**
 
 ```json
@@ -142,5 +134,185 @@ The backend API is deployed at:
   "minutes_per_day": 0.0,
   "accuracy": 0.0,
   "decks": []
+}
+```
+
+### Deck Routes
+
+#### Create a new deck
+
+**POST** `/decks`
+**Request Body:**
+
+```json
+{
+  "title": "a simple deck",
+  "description": "creating a demo deck",
+  "subject": "english",
+  "category": "demo",
+  "difficulty": 1,
+  "user_id": 1
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "title": "a simple deck",
+  "description": "creating a demo deck",
+  "subject": "english",
+  "category": "demo",
+  "difficulty": 1,
+  "user_id": 1,
+  "created_at": "2025-03-07T07:47:21",
+  "updated_at": "2025-03-07T07:47:21"
+}
+```
+
+#### Get all decks
+
+**GET** `/decks`
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "title": "a simple deck",
+    "description": "creating a demo deck",
+    "subject": "english",
+    "category": "demo",
+    "difficulty": 1,
+    "created_at": "2025-03-07T07:47:21",
+    "updated_at": "2025-03-07T07:47:21"
+  }
+]
+```
+
+#### Retrieve a single deck by ID
+
+**GET** `/decks/<deck_id>`
+**Response:**
+
+```json
+{
+  "id": 1,
+  "title": "a simple deck",
+  "description": "creating a demo deck",
+  "subject": "english",
+  "category": "demo",
+  "difficulty": 1,
+  "created_at": "2025-03-07T07:47:21",
+  "updated_at": "2025-03-07T07:47:21"
+}
+```
+
+#### Update an existing deck
+
+**PUT** `/decks/<deck_id>`
+**Request Body:**
+
+```json
+{
+  "title": "updated deck",
+  "description": "creating a demo deck and updating it",
+  "subject": "english update",
+  "category": "demo update",
+  "difficulty": 3,
+  "user_id": 1
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "title": "updated deck",
+  "description": "creating a demo deck and updating it",
+  "subject": "english update",
+  "category": "demo update",
+  "difficulty": 3,
+  "updated_at": "2025-03-07T07:58:01"
+}
+```
+
+#### Delete a deck
+
+**DELETE** `/decks/<deck_id>`
+**Response:**
+
+```json
+{
+  "message": "Deck deleted successfully"
+}
+```
+
+### Flashcard Routes
+
+#### Create a new flashcard
+
+**POST** `/flashcards`
+**Request Body:**
+
+```json
+{
+  "deck_id": 1,
+  "front_text": "What is 1 + 1",
+  "back_text": "2"
+}
+```
+
+**Response:**
+
+```json
+{
+  "id": 1,
+  "deck_id": 1,
+  "front_text": "What is 1 + 1",
+  "back_text": "2",
+  "created_at": "2025-03-07T08:06:58",
+  "updated_at": "2025-03-07T08:06:58"
+}
+```
+
+#### Retrieve all flashcards
+
+**GET** `/flashcards`
+**Response:**
+
+```json
+[
+  {
+    "id": 1,
+    "deck_id": 1,
+    "front_text": "What is 1 + 1",
+    "back_text": "2",
+    "created_at": "2025-03-07T08:06:58",
+    "updated_at": "2025-03-07T08:06:58"
+  }
+]
+```
+
+#### Update a flashcard
+
+**PUT** `/flashcards/<id>`
+
+```json
+{
+  "front_text": "What is 1 + 4",
+  "back_text": "5"
+}
+```
+
+#### Delete a flashcard
+
+**DELETE** `/flashcards/<id>`
+
+```json
+{
+  "message": "Flashcard deleted successfully"
 }
 ```
