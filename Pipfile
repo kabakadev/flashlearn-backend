@@ -26,7 +26,6 @@ markupsafe = "==2.1.5"
 ps = "==0.1.0"
 psycopg2-binary = "==2.9.10"
 pyjwt = "==2.9.0"
-python-dotenv = "==1.0.0"
 pytz = "==2025.1"
 six = "==1.17.0"
 sqlalchemy = "==2.0.23"
@@ -34,6 +33,7 @@ typing-extensions = "==4.12.2"
 werkzeug = "==2.3.7"
 zipp = "==3.20.2"
 sqlalchemy-serializer = "*"
+python-dotenv = "*"
 
 [dev-packages]
 
