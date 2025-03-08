@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from config import app, db, api
 from routes.auth_routes import Signup, Login, ProtectedUser
 from routes.deck_routes import DecksResource, DeckResource
@@ -6,6 +6,21 @@ from routes.flashcard_routes import FlashcardResource, FlashcardDetailResource
 from routes.dashboard_routes import Dashboard
 from routes.progress_routes import ProgressResource
 from routes.stats_routes import UserStatsResource
+
+@app.route('/')
+def home():
+    return jsonify({
+        "message": "Welcome to the Flashcard App!",
+        "endpoints": {
+            "signup": "/signup",
+            "login": "/login",
+            "user": "/user",
+            "decks": "/decks",
+            "dashboard": "/dashboard",
+            "progress": "/progress",
+            "user_stats": "/user/stats"
+        }
+    })
 
 # Register all routes
 api.add_resource(Signup, "/signup")
