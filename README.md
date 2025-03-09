@@ -316,3 +316,43 @@ flask run
   "message": "Flashcard deleted successfully"
 }
 ```
+
+### Authentication Routes
+
+- **POST /signup** - Register a new user
+- **POST /login** - Authenticate user and return a token
+- **GET /user** - Retrieve authenticated user details (🔒 Protected)
+
+### Dashboard Routes
+
+- **GET /dashboard** - Retrieve user dashboard data (🔒 Protected)
+
+### Deck Routes
+
+- **POST /decks** - Create a new deck for the authenticated user (🔒 Protected)
+- **GET /decks** - Retrieve all decks (🔒 Protected)
+- **GET /decks/<int:deck_id>** - Retrieve a single deck by ID (🔒 Protected)
+- **PUT /decks/<int:deck_id>** - Update an existing deck (🔒 Protected)
+- **DELETE /decks/<int:deck_id>** - Delete an existing deck (🔒 Protected)
+
+### Flashcard Routes
+
+- **POST /flashcards** - Create a new flashcard for a deck (🔒 Protected)
+- **GET /flashcards** - Retrieve all flashcards (🔒 Protected)
+- **PUT /flashcards/<int:id>** - Update a flashcard by ID (🔒 Protected)
+- **DELETE /flashcards/<int:id>** - Delete a flashcard by ID (🔒 Protected)
+
+### Progress Tracking Routes
+
+- **GET /progress** - Retrieve user progress (🔒 Protected)
+- **GET /progress/<int:progress_id>** - Retrieve progress by ID (🔒 Protected)
+- **GET /progress/deck/<int:deck_id>** - Retrieve progress for a specific deck (🔒 Protected)
+- **GET /progress/flashcard/<int:flashcard_id>** - Retrieve progress for a specific flashcard (🔒 Protected)
+
+### User Statistics Route
+
+- **GET /user/stats** - Retrieve user statistics (🔒 Protected)
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
