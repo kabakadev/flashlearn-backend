@@ -70,8 +70,14 @@ class Flashcard(db.Model, SerializerMixin):
     back_text = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, server_default=db.func.current_timestamp())
     updated_at = db.Column(db.DateTime, server_default=db.func.current_timestamp(), onupdate=db.func.current_timestamp())
+    progress = db.relationship(
+        'Progress', 
+        backref='flashcard', 
+        cascade='all, delete-orphan',
+        passive_deletes=True
+    )
 
-    serialize_rules = ('-deck.flashcards',)
+    serialize_rules = ('-deck.flashcards','-progress.flashcard')
 
 class Progress(db.Model, SerializerMixin):
     __tablename__ = 'progress'
@@ -79,7 +85,7 @@ class Progress(db.Model, SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     deck_id = db.Column(db.Integer, db.ForeignKey('decks.id'), nullable=False)
-    flashcard_id = db.Column(db.Integer, db.ForeignKey('flashcards.id'), nullable=False)
+    flashcard_id = db.Column(db.Integer, db.ForeignKey('flashcards.id',ondelete='CASCADE'), nullable=False)
 
     # Fields with default values to ensure they are never None
     study_count = db.Column(db.Integer, default=0, nullable=False)
