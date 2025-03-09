@@ -22,7 +22,7 @@ FlashLearn is a RESTful API built using Flask for managing decks, flashcards, us
 
 - Familiarity with Python
 - Python 3.8 and above installed
-- SQLite database
+- PostgreSQL (as the database)
 
 ## Installation
 
